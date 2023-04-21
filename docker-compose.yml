@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  blue-web: &web
+    container_name: blue-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.web.entrypoints=web"
+      - "traefik.http.middlewares.test-retry.retry.attempts=5"
+      - "traefik.http.middlewares.test-retry.retry.initialinterval=200ms"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+      - "traefik.http.services.web.loadbalancer.healthCheck.path=/health"
+      - "traefik.http.services.web.loadbalancer.healthCheck.interval=10s"
+      - "traefik.http.services.web.loadbalancer.healthCheck.timeout=1s"
+    restart: always
+    networks:
+      - traefik
+
+  green-web:
+    <<: *web
+    container_name: green-web
+
+networks:
+  traefik:
+    name: traefik_webgateway
+    external: true

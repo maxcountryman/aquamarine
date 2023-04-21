@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  traefik:
+    container_name: traefik
+    platform: linux/amd64
+    image: traefik:v2.9
+    labels:
+      - "traefik.http.routers.api.rule=Host(`localhost`)"
+      - "traefik.http.routers.api.service=api@internal"
+    networks:
+      - webgateway
+    ports:
+      - "80:80"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/traefik.yml
+    restart: unless-stopped
+
+networks:
+  webgateway:
+    driver: bridge
